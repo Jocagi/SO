@@ -1,0 +1,1 @@
+cmd_/home/jose/Desktop/SO/ej1.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/jose/Desktop/SO/ej1.ko /home/jose/Desktop/SO/ej1.o /home/jose/Desktop/SO/ej1.mod.o;  true
