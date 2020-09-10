@@ -7,33 +7,28 @@
 
 asmlinkage long sys_clone_file( char *source_file, char *dir )
 {
-    printk ("[] Start sys_clone_file/n");
+    printk ("[] Started sys_clone_file\n");
 
     struct file *input_fd;
     struct file *output_fd;
     size_t ret_in, ret_out;    /* Number of bytes returned by read() and write() */
     char buffer[BUF_SIZE]={0,};      /* Character buffer */
-    int ret;
-    int i;
     mm_segment_t old_fs;
     
-    char src[] = source_file;
-    char dst[] = dir;
+    int length_src = strlen(source_file);
+    int length_dst = strlen(dir);	
+	
+    char src[length_src];
+    char dst[length_src + length_dst];
     char* filename; 
 
-    //Get filename
-    filename = strrchr(src, '/');
+    //Get Input filename
+    strcpy(src, source_file); //copy src path
+    filename = strrchr(src, '/'); //get filename
     
-    printk ("[] Filename is %s\n", filename);
-    
-    //Input destination file
-    strcpy(dst, dir);
-    strcat(dst, src);
-
     printk ("[] Source file is %s\n", src);
-    printk ("[] Target file is %s\n", target_file);
-
-    
+    printk ("[] Filename is %s\n", filename);
+ 
     /* Create input file descriptor */
     input_fd = filp_open(src, O_RDONLY, 0);
 
@@ -41,19 +36,25 @@ asmlinkage long sys_clone_file( char *source_file, char *dir )
         printk ("[!] Can not open the src file \n");
         return -1;
     }
+ 
+    //Get destination file path
+    strcpy(dst, dir); //copy dst path
+    strcat(dst, filename); //append filename
 
+    printk ("[] Target file is %s\n", dst);
+    
     /* Create output file descriptor */
-    output_fd = filp_open(dst, O_WRONLY|O_CREAT, 0666);
+    output_fd = filp_open(dst, O_WRONLY|O_CREAT|O_DIRECTORY, 0666);
 
     if(IS_ERR(output_fd)){
         printk("[!] Can't create the dstfile\n");
-        return -1;
+        return -2;
     }
 
-	old_fs=get_fs();
-	set_fs(get_ds());
+	old_fs = get_fs();
+	set_fs(KERNEL_DS);
 
-	printk("File copied succesfully.\n");
+	printk("[*] File copied succesfully.\n");
 
 	set_fs(old_fs);
 
@@ -62,6 +63,4 @@ asmlinkage long sys_clone_file( char *source_file, char *dir )
 	filp_close(output_fd, 0);
 
     return 0;
-
 }
-
