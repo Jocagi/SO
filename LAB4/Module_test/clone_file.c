@@ -20,6 +20,9 @@
  * for exposing parameters in sysfs (if non-zero) at a later stage.
  */
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Jocagi");
+
 static char *source_file = "blah";
 module_param(source_file, charp, 0000);
 MODULE_PARM_DESC(source_file, "Path to source file");
@@ -36,9 +39,12 @@ static int __init clone_init(void)
 
     struct file *input_fd;
     struct file *output_fd;
-    size_t ret_in, ret_out;    /* Number of bytes returned by read() and write() */
-    char buffer[BUF_SIZE]={0,};      /* Character buffer */
     mm_segment_t old_fs;
+
+    ssize_t ret_in, ret_out;    /* Number of bytes returned by read() and write() */
+    char buffer[BUF_SIZE]={0,};      /* Character buffer */
+    int ret;
+    loff_t pos;
     
     int length_src = strlen(source_file);
     int length_dst = strlen(dir);	
@@ -61,6 +67,11 @@ static int __init clone_init(void)
         printk ("[!] Can not open the src file \n");
         return -1;
     }
+    else
+    {
+        ret_in = kernel_read(input_fd, buffer, BUF_SIZE, &pos);
+        printk ("[] File content: %s \n", buffer);
+    }
  
     //Get destination file path
     strcpy(dst, dir); //copy dst path
@@ -69,16 +80,22 @@ static int __init clone_init(void)
     printk ("[] Target file is %s\n", dst);
     
     /* Create output file descriptor */
-    output_fd = filp_open(dst, O_WRONLY|O_CREAT|O_DIRECTORY, 0666);
+    output_fd = filp_open(dst, O_WRONLY|O_CREAT|O_DIRECTORY, 0644);
 
     if(IS_ERR(output_fd)){
         printk("[!] Can't create the dstfile\n");
         return -2;
     }
+    else
+    {
+        ret_out = kernel_write(output_fd, buffer, BUF_SIZE, &pos);
+        printk ("[] Copied %d bytes... \n", ret_out);
+    }
 
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 
+	//printk("%ld\n", input_fd->f_op->read(input_fd,buffer,BUF_SIZE,&input_fd->f_pos));
 	printk("[*] File copied succesfully.\n");
 
 	set_fs(old_fs);
