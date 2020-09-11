@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	long int s = syscall(548, "~/Desktop/test.txt", "~/Documents");
+	long int s = syscall(549, "/home/jose/Desktop/test2.txt", "/home/jose/Documents");
 	printf("Prueba 1 :: clone_file :: %1d\n", s);
 	
 //    int length_src = strlen(argv[1]);

@@ -1,1 +1,0 @@
-cmd_/home/jose/Desktop/SO/LAB4/Module_test/clone.ko := ld -r -m elf_x86_64  -z max-page-size=0x200000  --build-id  -T ./scripts/module-common.lds -o /home/jose/Desktop/SO/LAB4/Module_test/clone.ko /home/jose/Desktop/SO/LAB4/Module_test/clone.o /home/jose/Desktop/SO/LAB4/Module_test/clone.mod.o;  true

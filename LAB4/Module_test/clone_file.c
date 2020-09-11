@@ -33,7 +33,7 @@ MODULE_PARM_DESC(dir, "Path to target dir");
 
 static int __init clone_init(void)
 {
-    printk(KERN_INFO "Hello, world 5\n=============\n");
+    printk(KERN_INFO "=============\n Hello world !!! \n");
 	
     printk ("[] Started sys_clone_file\n");
 
@@ -43,8 +43,8 @@ static int __init clone_init(void)
 
     ssize_t ret_in, ret_out;    /* Number of bytes returned by read() and write() */
     char buffer[BUF_SIZE]={0,};      /* Character buffer */
-    int ret;
     loff_t pos;
+    pos = 0;
     
     int length_src = strlen(source_file);
     int length_dst = strlen(dir);	
@@ -63,14 +63,26 @@ static int __init clone_init(void)
     /* Create input file descriptor */
     input_fd = filp_open(src, O_RDONLY, 0);
 
-    if (IS_ERR(input_fd)) {
+    if (IS_ERR(input_fd)) 
+    {
         printk ("[!] Can not open the src file \n");
         return -1;
     }
     else
     {
-        ret_in = kernel_read(input_fd, buffer, BUF_SIZE, &pos);
+        ret_in = kernel_read(input_fd, buffer, BUF_SIZE, &input_fd->f_pos);
         printk ("[] File content: %s \n", buffer);
+        printk ("[] Copied %ld bytes... \n", ret_in);
+    }
+ 
+    //Reader
+    int fileSize;
+    for(fileSize = 0; fileSize < BUF_SIZE; ++fileSize )
+    {
+    if(buffer[fileSize] == '\0')
+     {
+       break;
+     }
     }
  
     //Get destination file path
@@ -80,22 +92,23 @@ static int __init clone_init(void)
     printk ("[] Target file is %s\n", dst);
     
     /* Create output file descriptor */
-    output_fd = filp_open(dst, O_WRONLY|O_CREAT|O_DIRECTORY, 0644);
+    output_fd = filp_open(dst, O_WRONLY|O_CREAT|O_TRUNC, 0777);
 
-    if(IS_ERR(output_fd)){
+    if(IS_ERR(output_fd))
+    {
+        filp_close(input_fd, 0);
         printk("[!] Can't create the dstfile\n");
         return -2;
     }
     else
     {
-        ret_out = kernel_write(output_fd, buffer, BUF_SIZE, &pos);
-        printk ("[] Copied %d bytes... \n", ret_out);
+        ret_out = kernel_write(output_fd, buffer, fileSize, &output_fd->f_pos);
+        printk ("[] Pasted %ld bytes... \n", ret_out);
     }
 
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 
-	//printk("%ld\n", input_fd->f_op->read(input_fd,buffer,BUF_SIZE,&input_fd->f_pos));
 	printk("[*] File copied succesfully.\n");
 
 	set_fs(old_fs);
@@ -103,7 +116,7 @@ static int __init clone_init(void)
 	/* Close file descriptors */
 	filp_close(input_fd, 0);
 	filp_close(output_fd, 0);
-
+	
     return 0;
 }
 
