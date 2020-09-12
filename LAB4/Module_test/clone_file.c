@@ -8,6 +8,7 @@
 #include <linux/stat.h>
 #include <linux/fs.h>
 #include <linux/string.h>
+#include <linux/uaccess.h>
 #include <asm/uaccess.h>
 
 #define BUF_SIZE 4096
@@ -33,6 +34,7 @@ MODULE_PARM_DESC(dir, "Path to target dir");
 
 static int __init clone_init(void)
 {
+
     printk(KERN_INFO "=============\n Hello world !!! \n");
 	
     printk ("[] Started sys_clone_file\n");
@@ -52,6 +54,12 @@ static int __init clone_init(void)
     char src[length_src];
     char dst[length_src + length_dst];
     char* filename; 
+
+    //Get data
+    copy_from_user(src, source_file, length_src);
+    printk("Source file: %s", src);
+    copy_from_user(dst, dir, length_dst);
+    printk("Dest directory: %s", dst);
 
     //Get Input filename
     strcpy(src, source_file); //copy src path
