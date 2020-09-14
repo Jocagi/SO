@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	long int s = syscall(549, "/home/jose/Desktop/test.txt", "/home/jose/Documents");
+	long int s = syscall(332, "/home/jose/Desktop/copyFile.c", "/home/jose/Documents");
 	printf("Prueba :: clone_file :: %ld\n", s);
 	
     return 0;

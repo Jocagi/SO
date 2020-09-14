@@ -1,17 +1,20 @@
-#include <linux/syscalls.h>
+
+/* Tested on linux 4.10.13 */
+
 #include <linux/kernel.h>
 #include <linux/init.h>
-#include <linux/stat.h>
+#include <linux/module.h>
+#include <linux/syscalls.h>
+#include <linux/file.h>
 #include <linux/fs.h>
-#include <linux/string.h>
-#include <linux/uaccess.h>
+#include <linux/fcntl.h>
 #include <asm/uaccess.h>
 
 #define BUF_SIZE 4096
 
-SYSCALL_DEFINE2(sys_clone_file, char*, source_file, char*, dir)
+asmlinkage long sys_cloneFile(char *source_file, char *dir)
 {
-    printk(KERN_INFO "=============\n Hello world !!! \n");
+printk(KERN_INFO "=============\n Hello world !!! :P\n");
 	
     printk ("[] Started sys_clone_file\n");
 
@@ -19,10 +22,9 @@ SYSCALL_DEFINE2(sys_clone_file, char*, source_file, char*, dir)
     struct file *output_fd;
     mm_segment_t old_fs;
 
-    ssize_t ret_in, ret_out;    /* Number of bytes returned by read() and write() */
-    char buffer[BUF_SIZE]={0,};      /* Character buffer */
+    ssize_t ret_in, ret_out;/* Number of bytes returned by read() and write() */
+    char buffer[BUF_SIZE]={0,};/* Character buffer */
     loff_t pos;
-    pos = 0;
     
     int length_src = strlen(source_file);
     int length_dst = strlen(dir);	
@@ -30,12 +32,6 @@ SYSCALL_DEFINE2(sys_clone_file, char*, source_file, char*, dir)
     char src[length_src];
     char dst[length_src + length_dst];
     char* filename; 
-
-    //Get data
-    copy_from_user(src, source_file, length_src);
-    printk("Source file: %s", src);
-    copy_from_user(dst, dir, length_dst);
-    printk("Dest directory: %s", dst);
 
     //Get Input filename
     strcpy(src, source_file); //copy src path
@@ -54,8 +50,8 @@ SYSCALL_DEFINE2(sys_clone_file, char*, source_file, char*, dir)
     }
     else
     {
-        ret_in = kernel_read(input_fd, buffer, BUF_SIZE, &input_fd->f_pos);
-        printk ("[] File content: %s \n", buffer);
+	pos = input_fd->f_pos;
+        ret_in = __vfs_read(input_fd, buffer, 4096, &pos);
         printk ("[] Copied %ld bytes... \n", ret_in);
     }
  
@@ -86,7 +82,7 @@ SYSCALL_DEFINE2(sys_clone_file, char*, source_file, char*, dir)
     }
     else
     {
-        ret_out = kernel_write(output_fd, buffer, fileSize, &output_fd->f_pos);
+        ret_out = __vfs_write(output_fd, buffer, fileSize, &output_fd->f_pos);
         printk ("[] Pasted %ld bytes... \n", ret_out);
     }
 
@@ -102,4 +98,4 @@ SYSCALL_DEFINE2(sys_clone_file, char*, source_file, char*, dir)
 	filp_close(output_fd, 0);
 	
     return 0;
-}
+} 
