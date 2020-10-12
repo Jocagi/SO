@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1602346940 source:c:\users\user\desktop\lab8\main.c
+	<windows.h>
+	<tchar.h>
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+
