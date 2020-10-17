@@ -35,7 +35,7 @@ DWORD WINAPI ThreadFunc( LPVOID lpParam )
 
 	while ( i < 5)
 	{
-		// creating file pointer to work with files
+	// creating file pointer to work with files
         FILE *fptr;
 
         // opening file in writing mode
