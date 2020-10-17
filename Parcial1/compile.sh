@@ -1,4 +1,4 @@
-gcc codigo.c -pthread
+gcc parcial.c -pthread
 printf "\n"
 echo "----------PROGRAM----------"
 printf "\n"
